@@ -24,7 +24,7 @@ type Scanner struct {
 	// path is the directory being scanned.
 	path string
 
-	// sep is the OS's path separator represented as a string.
+	// separator is the OS's path separator represented as a string.
 	separator string
 }
 
@@ -82,7 +82,7 @@ func (s *Scanner) scan(path string) {
 
 	basedir := strings.TrimRight(path, s.separator)
 	for _, f := range files {
-		file := strings.Join([]string{basedir, f.Name()}, s.separator)
+		file := basedir + s.separator + f.Name()
 		if f.IsDir() {
 			s.scan(file)
 		} else {
