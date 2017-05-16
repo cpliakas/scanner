@@ -24,7 +24,7 @@ type Scanner struct {
 	// path is the directory being scanned.
 	path string
 
-	// sep is
+	// sep is the OS's path separator represented as a string.
 	separator string
 }
 
