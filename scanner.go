@@ -24,7 +24,10 @@ type Scanner struct {
 	// path is the directory being scanned.
 	path string
 
-	// separator is the OS's path separator represented as a string.
+	// separator is the OS's path separator represented as a string. We
+	// store this value in a struct so we don;t have to repeatedly convert
+	// the rune to a string. This is a micro-optimization, but an
+	// optimization none the less.
 	separator string
 }
 
@@ -50,23 +53,25 @@ func (s *Scanner) Scan(h Handler) {
 		close(s.errs)
 	}()
 
-	if h != nil {
-		wg.Add(2)
-
-		go func() {
-			defer wg.Done()
-			for err := range s.errs {
-				h.HandleError(err)
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			for f := range s.files {
-				h.Handle(f)
-			}
-		}()
+	if h == nil {
+		return
 	}
+
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		for err := range s.errs {
+			h.HandleError(err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for f := range s.files {
+			h.Handle(f)
+		}
+	}()
 
 	wg.Wait()
 }
