@@ -12,9 +12,6 @@ import (
 // Scanner recursively scans a directory for files.
 type Scanner struct {
 
-	// Buffer is length of the files channel buffer.
-	Buffer int
-
 	// errs is the channel that errors are sent to.
 	errs chan error
 
@@ -29,6 +26,9 @@ type Scanner struct {
 	// the rune to a string. This is a micro-optimization, but an
 	// optimization none the less.
 	separator string
+
+	// Buffer is length of the files channel buffer.
+	Buffer int
 }
 
 // New returns a new Scanner instance.
@@ -98,11 +98,20 @@ func (s *Scanner) scan(path string) {
 
 // Handler is an interface for handlers that process scanned files.
 type Handler interface {
+
+	// Handle is passed the path to the file that was discovered during the
+	// scan operation. Files are passed in a single-threaded manner, so
+	// concurrency is the responsibility of the Handler implementation.
 	Handle(string)
+
+	// HandleError is passed the errors that occur during scan operations.
+	// Like the Handle method, errors are passed in a single-threaded
+	// manner.
 	HandleError(error)
 }
 
-// MemoryHandler returns a new memoryHandler instance.
+// MemoryHandler returns a new memoryHandler instance, which stores the
+// scanned files and error in local slices.
 func MemoryHandler() *memoryHandler {
 	return &memoryHandler{}
 }
