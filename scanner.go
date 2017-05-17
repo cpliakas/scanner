@@ -12,6 +12,9 @@ import (
 // Scanner recursively scans a directory for files.
 type Scanner struct {
 
+	// Buffer is length of the files channel buffer.
+	Buffer int
+
 	// errs is the channel that errors are sent to.
 	errs chan error
 
@@ -26,9 +29,6 @@ type Scanner struct {
 	// the rune to a string. This is a micro-optimization, but an
 	// optimization none the less.
 	separator string
-
-	// Buffer is length of the files channel buffer.
-	Buffer int
 }
 
 // New returns a new Scanner instance.
@@ -111,7 +111,8 @@ type Handler interface {
 }
 
 // MemoryHandler returns a new memoryHandler instance, which stores the
-// scanned files and error in local slices.
+// scanned files and errors in the exported Files and Errors fields
+// respectively.
 func MemoryHandler() *memoryHandler {
 	return &memoryHandler{}
 }
