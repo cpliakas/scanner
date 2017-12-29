@@ -117,18 +117,19 @@ func MemoryHandler() *memoryHandler {
 	return &memoryHandler{}
 }
 
-// memoryHandler stores the scanned files and errors in slices.
+// memoryHandler implements Handler and stores the scanned files and errors
+// in slices.
 type memoryHandler struct {
 	Files  []string
 	Errors []error
 }
 
-// Handle stores file in a struct.
+// Handle implements Handler.Handle and stores file in a struct.
 func (h *memoryHandler) Handle(file string) {
 	h.Files = append(h.Files, file)
 }
 
-// HandleError stores err in a struct.
+// HandleError implements Handler.HandleError stores err in a struct.
 func (h *memoryHandler) HandleError(err error) {
 	h.Errors = append(h.Errors, err)
 }
