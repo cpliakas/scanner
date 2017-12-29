@@ -49,14 +49,13 @@ func TestScannerNilHandler(t *testing.T) {
 
 func ExampleScanner_Scan() {
 	s := scanner.New("test/data")
-	h := scanner.NewMemoryHandler()
 
+	h := scanner.NewMemoryHandler()
 	s.Scan(h)
 
 	if len(h.Files) > 0 {
 		fmt.Println(h.Files[0])
 	}
-
 	// Output: test/data/file1.txt
 }
 

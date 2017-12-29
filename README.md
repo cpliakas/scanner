@@ -8,6 +8,10 @@
 Package scanner provides a recursive file scanner that is useful for
 efficiently processing relatively static datasets.
 
+By using Go's concurrency primitives, this package provides a framework to
+decouple file discovery from processing of the discovered files through
+implementing the `scanner.Handler` interface.
+
 ## Installation
 
 Assuming a [correctly configured](https://golang.org/doc/install#testing) Go
@@ -15,4 +19,34 @@ toolchain:
 
 ```shell
 go get github.com/cpliakas/scanner
+```
+
+## Usage
+
+The code below recursively discovers files in the `/path/to/dir` directory and
+writes their paths to STDOUT.
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/cpliakas/scanner"
+)
+
+func main() {
+
+	// Set the directory that ou want to recursively discover files in.
+	s := scanner.New("/path/to/dir")
+
+	// Scan the directory, capture the file paths in memory.
+	h := scanner.NewMemoryHandler()
+	s.Scan(h)
+
+	// Print the paths of the discovered files to STDOUT.
+	for _, f := range h.Files {
+		fmt.Println(f)
+	}
+}
 ```
