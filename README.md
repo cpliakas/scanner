@@ -10,7 +10,9 @@ efficiently processing relatively static datasets.
 
 By using Go's concurrency primitives, this package provides a framework to
 decouple file discovery from processing of the discovered files through
-implementing the `scanner.Handler` interface.
+implementing the [Handler](https://godoc.org/github.com/cpliakas/scanner#Handler)
+interface and setting [Scanner.Buffer](https://godoc.org/github.com/cpliakas/scanner#Scanner)
+to a value greater than the default of `1`.
 
 ## Installation
 
@@ -37,7 +39,7 @@ import (
 
 func main() {
 
-	// Set the directory that ou want to recursively discover files in.
+	// Set the directory that will be recursively scanned for files.
 	s := scanner.New("/path/to/dir")
 
 	// Scan the directory, capture the file paths in memory.
