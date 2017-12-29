@@ -9,7 +9,7 @@ import (
 )
 
 func TestScanner(t *testing.T) {
-	s := scanner.New("test/data")
+	s := scanner.New("fixtures/data")
 
 	h := scanner.NewMemoryHandler()
 	s.Scan(h)
@@ -17,19 +17,19 @@ func TestScanner(t *testing.T) {
 	if len(h.Files) != 3 {
 		t.Fatalf("expected 3 files, got %v", len(h.Files))
 	}
-	if h.Files[0] != "test/data/file1.txt" {
-		t.Fatalf("expected 'test/data/file1.txt', got '%s'", h.Files[0])
+	if h.Files[0] != "fixtures/data/file1.txt" {
+		t.Fatalf("expected 'fixtures/data/file1.txt', got '%s'", h.Files[0])
 	}
-	if h.Files[1] != "test/data/subdir/file2.txt" {
-		t.Fatalf("expected 'test/data/subdir/file2.txt', got '%s'", h.Files[1])
+	if h.Files[1] != "fixtures/data/subdir/file2.txt" {
+		t.Fatalf("expected 'fixtures/data/subdir/file2.txt', got '%s'", h.Files[1])
 	}
-	if h.Files[2] != "test/data/subdir/file3.txt" {
-		t.Fatalf("expected 'test/data/subdir/file3.txt', got '%s'", h.Files[2])
+	if h.Files[2] != "fixtures/data/subdir/file3.txt" {
+		t.Fatalf("expected 'fixtures/data/subdir/file3.txt', got '%s'", h.Files[2])
 	}
 }
 
 func TestScannerError(t *testing.T) {
-	s := scanner.New("test/data/baddir")
+	s := scanner.New("fixtures/data/baddir")
 
 	h := scanner.NewMemoryHandler()
 	s.Scan(h)
@@ -43,12 +43,12 @@ func TestScannerError(t *testing.T) {
 }
 
 func TestScannerNilHandler(t *testing.T) {
-	s := scanner.New("test/data")
+	s := scanner.New("fixtures/data")
 	s.Scan(nil)
 }
 
 func ExampleScanner_Scan() {
-	s := scanner.New("test/data")
+	s := scanner.New("fixtures/data")
 
 	h := scanner.NewMemoryHandler()
 	s.Scan(h)
@@ -56,12 +56,12 @@ func ExampleScanner_Scan() {
 	if len(h.Files) > 0 {
 		fmt.Println(h.Files[0])
 	}
-	// Output: test/data/file1.txt
+	// Output: fixtures/data/file1.txt
 }
 
 func BenchmarkScanner(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		s := scanner.New("test/data")
+		s := scanner.New("fixtures/data")
 		s.Scan(nil)
 	}
 }
