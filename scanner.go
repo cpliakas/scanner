@@ -18,14 +18,14 @@ type Scanner struct {
 	// errs is the channel that errors are sent to.
 	errs chan error
 
-	// files is the challen that discovered files are sent to.
+	// files is the channel that discovered files are sent to.
 	files chan string
 
 	// path is the directory being scanned.
 	path string
 
 	// separator is the OS's path separator represented as a string. We
-	// store this value in a struct so we don;t have to repeatedly convert
+	// store this value in a struct so we don't have to repeatedly convert
 	// the rune to a string. This is a micro-optimization, but an
 	// optimization none the less.
 	separator string
