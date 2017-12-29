@@ -11,7 +11,7 @@ import (
 func TestScanner(t *testing.T) {
 	s := scanner.New("test/data")
 
-	h := scanner.MemoryHandler()
+	h := scanner.NewMemoryHandler()
 	s.Scan(h)
 
 	if len(h.Files) != 3 {
@@ -31,7 +31,7 @@ func TestScanner(t *testing.T) {
 func TestScannerError(t *testing.T) {
 	s := scanner.New("test/data/baddir")
 
-	h := scanner.MemoryHandler()
+	h := scanner.NewMemoryHandler()
 	s.Scan(h)
 
 	if len(h.Errors) != 1 {
@@ -49,7 +49,7 @@ func TestScannerNilHandler(t *testing.T) {
 
 func ExampleScanner_Scan() {
 	s := scanner.New("test/data")
-	h := scanner.MemoryHandler()
+	h := scanner.NewMemoryHandler()
 
 	s.Scan(h)
 

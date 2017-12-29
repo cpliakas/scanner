@@ -110,26 +110,26 @@ type Handler interface {
 	HandleError(error)
 }
 
-// MemoryHandler returns a new memoryHandler instance, which stores the
+// NewMemoryHandler returns a new MemoryHandler instance, which stores the
 // scanned files and errors in the exported Files and Errors fields
 // respectively.
-func MemoryHandler() *memoryHandler {
-	return &memoryHandler{}
+func NewMemoryHandler() *MemoryHandler {
+	return &MemoryHandler{}
 }
 
-// memoryHandler implements Handler and stores the scanned files and errors
+// MemoryHandler implements Handler and stores the scanned files and errors
 // in slices.
-type memoryHandler struct {
+type MemoryHandler struct {
 	Files  []string
 	Errors []error
 }
 
 // Handle implements Handler.Handle and stores file in a struct.
-func (h *memoryHandler) Handle(file string) {
+func (h *MemoryHandler) Handle(file string) {
 	h.Files = append(h.Files, file)
 }
 
 // HandleError implements Handler.HandleError stores err in a struct.
-func (h *memoryHandler) HandleError(err error) {
+func (h *MemoryHandler) HandleError(err error) {
 	h.Errors = append(h.Errors, err)
 }
