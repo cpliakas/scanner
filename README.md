@@ -37,7 +37,7 @@ import (
 
 func main() {
 
-	// Set the directory that ou want to recursively discover files in.
+	// Set the directory that will be recursively scanned for files.
 	s := scanner.New("/path/to/dir")
 
 	// Scan the directory, capture the file paths in memory.
