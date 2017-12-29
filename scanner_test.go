@@ -1,6 +1,7 @@
 package scanner_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -44,6 +45,19 @@ func TestScannerError(t *testing.T) {
 func TestScannerNilHandler(t *testing.T) {
 	s := scanner.New("test/data")
 	s.Scan(nil)
+}
+
+func ExampleScanner_Scan() {
+	s := scanner.New("test/data")
+	h := scanner.MemoryHandler()
+
+	s.Scan(h)
+
+	if len(h.Files) > 0 {
+		fmt.Println(h.Files[0])
+	}
+
+	// Output: test/data/file1.txt
 }
 
 func BenchmarkScanner(b *testing.B) {
