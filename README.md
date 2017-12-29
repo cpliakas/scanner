@@ -10,7 +10,9 @@ efficiently processing relatively static datasets.
 
 By using Go's concurrency primitives, this package provides a framework to
 decouple file discovery from processing of the discovered files through
-implementing the `scanner.Handler` interface.
+implementing the [Handler](https://godoc.org/github.com/cpliakas/scanner#Handler)
+interface and setting the [Scanner.Buffer](https://godoc.org/github.com/cpliakas/scanner#Scanner)
+to a value greater than the default of `1`.
 
 ## Installation
 
