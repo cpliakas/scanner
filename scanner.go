@@ -90,6 +90,8 @@ func (s *Scanner) scan(path string) {
 		file := basedir + s.separator + f.Name()
 		if f.IsDir() {
 			s.scan(file)
+		} else if f.Mode()&os.ModeSymlink == os.ModeSymlink {
+			// TODO Figure out how to handle symlinks.
 		} else {
 			s.files <- file
 		}
