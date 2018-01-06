@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/cpliakas/scanner"
 )
@@ -42,6 +43,18 @@ func TestScannerError(t *testing.T) {
 	}
 }
 
+func TestScannerNegativeConcurrency(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic")
+		}
+	}()
+
+	s := scanner.New("fixtures/data")
+	s.Concurrency = 0
+	s.Scan(nil)
+}
+
 func TestScannerNilHandler(t *testing.T) {
 	s := scanner.New("fixtures/data")
 	s.Scan(nil)
@@ -65,3 +78,15 @@ func BenchmarkScanner(b *testing.B) {
 		s.Scan(nil)
 	}
 }
+
+// delayHandler implements Handler and simulates handling that takes some time
+// in order to test concurrency.
+type delayHandler struct{}
+
+// Handle implements Handler.Handle and sleeps for one second.
+func (h *delayHandler) Handle(_ string) {
+	time.Sleep(time.Second * 1)
+}
+
+// HandleError implements Handler.HandleError and performs a no-op.
+func (h *delayHandler) HandleError(_ error) {}

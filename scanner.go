@@ -5,95 +5,129 @@ package scanner
 import (
 	"io/ioutil"
 	"os"
-	"strings"
+	"path/filepath"
 	"sync"
 )
 
 // Scanner recursively scans a directory for files.
 type Scanner struct {
 
-	// Buffer is length of the files channel buffer.
-	Buffer int
+	// Concurrency is maximum number of handling operations that are run
+	// at the same time. The default value is 1, resulting in single-threaded
+	// file handling.
+	Concurrency int
 
-	// errs is the channel that errors are sent to.
+	// Path is the directory being scanned.
+	Path string
+
+	// errs is the channel through which Scanner passes errors to Handler.
 	errs chan error
 
-	// files is the channel that discovered files are sent to.
+	// errs is the channel through which Scanner passes files to Handler.
 	files chan string
 
-	// path is the directory being scanned.
-	path string
+	// wait is the channel that limits concurrent handling of files and errors.
+	wait chan bool
 
-	// separator is the OS's path separator represented as a string. We
-	// store this value in a struct so we don't have to repeatedly convert
-	// the rune to a string. This is a micro-optimization, but an
-	// optimization none the less.
-	separator string
+	// wg is the wait group that the scanner uses to wait for all goroutines to
+	// complete.
+	wg *sync.WaitGroup
 }
 
 // New returns a new Scanner instance.
 func New(path string) *Scanner {
 	return &Scanner{
-		Buffer:    1,
-		errs:      make(chan error),
-		path:      path,
-		separator: string(os.PathSeparator),
+		Concurrency: 1,
+		Path:        path,
 	}
 }
 
 // Scan recursively scans the directory and sends the files and errors to
 // the passed Handler in goroutines.
 func (s *Scanner) Scan(h Handler) {
-	var wg sync.WaitGroup
-	s.files = make(chan string, s.Buffer)
 
-	go func() {
-		s.scan(s.path)
-		close(s.files)
-		close(s.errs)
-	}()
-
-	if h == nil {
-		return
+	// Concurrency cannot be less than 1, because a negative buffer argument
+	// when making a channel is not allowed (the argument is Concurrency - 1).
+	if s.Concurrency < 1 {
+		panic("Scanner.Concurrency must be >= 1")
 	}
 
-	wg.Add(2)
+	// Default to NullHandler.
+	if h == nil {
+		h = &NullHandler{}
+	}
 
-	go func() {
-		defer wg.Done()
-		for err := range s.errs {
-			h.HandleError(err)
-		}
-	}()
+	s.errs = make(chan error)
+	s.files = make(chan string)
+	s.wait = make(chan bool, s.Concurrency-1)
+	s.wg = &sync.WaitGroup{}
 
-	go func() {
-		defer wg.Done()
-		for f := range s.files {
-			h.Handle(f)
-		}
-	}()
+	// Start the scanning pipeline.
+	s.scan()
+	go s.handleFiles(h)
+	go s.handleErrors(h)
 
-	wg.Wait()
+	s.wg.Wait()
 }
 
-// scan recursively scans path and sends the discovered files and errors to
-// the built-in channels.
-func (s *Scanner) scan(path string) {
-	files, err := ioutil.ReadDir(path)
+// scan starts the scanning process and returns the channels that discovered
+// files and errors are sent to.
+func (s *Scanner) scan() {
+	s.wg.Add(1)
+	go func() {
+		defer s.wg.Done()
+		defer close(s.files)
+		defer close(s.errs)
+		s.readDir(s.Path)
+	}()
+	return
+}
+
+// handleFiles listens for errors and passes them to the handler. This method
+// is expected to be run in a goroutine.
+func (s *Scanner) handleFiles(h Handler) {
+	for fname := range s.files {
+		s.wg.Add(1)
+		go func(fname string) {
+			defer s.wg.Done()
+			h.Handle(fname)
+			<-s.wait
+		}(fname)
+	}
+}
+
+// handleErrors listens for errors and passes them to the handler. This method
+// is expected to be run in a goroutine.
+func (s *Scanner) handleErrors(h Handler) {
+	for err := range s.errs {
+		s.wg.Add(1)
+		go func(err error) {
+			defer s.wg.Done()
+			h.HandleError(err)
+			<-s.wait
+		}(err)
+	}
+}
+
+// readDir recursively scans path and sends the discovered files and errors to
+// the files and errs channels respectively.
+func (s *Scanner) readDir(dirname string) {
+	dir, err := ioutil.ReadDir(dirname)
 	if err != nil {
 		s.errs <- err
+		s.wait <- true
 		return
 	}
 
-	basedir := strings.TrimRight(path, s.separator)
-	for _, f := range files {
-		file := basedir + s.separator + f.Name()
-		if f.IsDir() {
-			s.scan(file)
-		} else if f.Mode()&os.ModeSymlink == os.ModeSymlink {
+	for _, file := range dir {
+		path := filepath.Join(dirname, file.Name())
+		if file.IsDir() {
+			s.readDir(path)
+		} else if file.Mode()&os.ModeSymlink == os.ModeSymlink {
 			// TODO Figure out how to handle symlinks.
 		} else {
-			s.files <- file
+			s.files <- path
+			s.wait <- true
 		}
 	}
 }
@@ -111,6 +145,15 @@ type Handler interface {
 	// manner.
 	HandleError(error)
 }
+
+// NullHandler implements Handler and performs no-ops.
+type NullHandler struct{}
+
+// Handle implements Handler.Handle and performs a no-op.
+func (h *NullHandler) Handle(_ string) {}
+
+// HandleError implements Handler.HandleError and performs a no-op.
+func (h *NullHandler) HandleError(_ error) {}
 
 // NewMemoryHandler returns a new MemoryHandler instance, which stores the
 // scanned files and errors in the exported Files and Errors fields
