@@ -29,6 +29,49 @@ func TestScanner(t *testing.T) {
 	}
 }
 
+func TestScannerNoConcurrency(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	done := make(chan bool)
+	go func() {
+		s := scanner.New("fixtures/data")
+		h := &delayHandler{}
+		s.Scan(h)
+		done <- true
+	}()
+
+	select {
+	case <-done:
+		t.Error("expected timeout when handling with no concurrency")
+	case <-time.After(time.Second * 2):
+		return
+	}
+}
+
+func TestScannerWithConcurrency(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
+	done := make(chan bool)
+	go func() {
+		s := scanner.New("fixtures/data")
+		s.Concurrency = 3
+		h := &delayHandler{}
+		s.Scan(h)
+		done <- true
+	}()
+
+	select {
+	case <-done:
+		return
+	case <-time.After(time.Second * 2):
+		t.Error("timeout, expected all files to be handled concurrently")
+	}
+}
+
 func TestScannerError(t *testing.T) {
 	s := scanner.New("fixtures/data/baddir")
 
