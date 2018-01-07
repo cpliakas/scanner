@@ -16,8 +16,8 @@ does the following things so you don't have to:
 * Provides a framework that decouples file discovery from processing
 * Uses Go's concurrency primitives for efficient file and error handling
 * Handles all the fun that comes with recursive functions and symlinks
-* Implements testing with high code coverage, because let's be honest, would
-  you really want to write the tests for this code?
+* Implements testing with high code coverage, because let's be honest, do you
+  *really* want to write them?
 
 ## Installation
 
