@@ -6,13 +6,18 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/cpliakas/scanner)](https://goreportcard.com/report/github.com/cpliakas/scanner)
 
 Package scanner provides a recursive file scanner that is useful for
-efficiently processing relatively static datasets.
+efficiently processing large and relatively static datasets.
 
-By using Go's concurrency primitives, this package provides a framework to
-decouple file discovery from processing of the discovered files through
-implementing the [Handler](https://godoc.org/github.com/cpliakas/scanner#Handler)
-interface and setting [Scanner.Concurrecny](https://godoc.org/github.com/cpliakas/scanner#Scanner)
-to a value greater than the default of `1`.
+## Why?
+
+Although recursively scanning a directory might seem trivial, this package
+does the following things so you don't have to:
+
+* Provides a framework that decouples file discovery from processing
+* Uses Go's concurrency primitives for efficient file and error handling
+* Handles all the fun that comes with recursive functions and symlinks
+* Implements testing with high code coverage, because let's be honest, would
+  you really want to write the tests for this code?
 
 ## Installation
 
@@ -25,30 +30,5 @@ go get github.com/cpliakas/scanner
 
 ## Usage
 
-The code below recursively discovers files in the `/path/to/dir` directory and
-writes their paths to STDOUT.
-
-```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/cpliakas/scanner"
-)
-
-func main() {
-
-	// Set the directory that will be recursively scanned for files.
-	s := scanner.New("/path/to/dir")
-
-	// Scan the directory, capture the file paths in memory.
-	h := scanner.NewMemoryHandler()
-	s.Scan(h)
-
-	// Print the paths of the discovered files to STDOUT.
-	for _, f := range h.Files {
-		fmt.Println(f)
-	}
-}
-```
+Refer to [GoDoc.org](https://godoc.org/github.com/cpliakas/scanner) for
+usage examples and code snippets.
