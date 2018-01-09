@@ -8,11 +8,11 @@
 Package scanner provides a recursive file scanner that is useful for
 efficiently processing large and relatively static datasets.
 
-**IMPORTANT** This code turned out to be crap. The implementation turned out
-to be no better than [filepath.Wak](https://golang.org/pkg/path/filepath/#Walk).
-In fact, it is a little slower. The goals are good, and a much better solution
-will be uploaded to https://github.com/cpliakas/filefinder. Sorry! I definitely
-learned a thing or two.
+**IMPORTANT**: This code turned out to be crap. The implementation is no better
+than [filepath.Wak](https://golang.org/pkg/path/filepath/#Walk). In fact, it is
+a little slower. The goals are good, and a much better solution will be uploaded
+to https://github.com/cpliakas/filefinder. Sorry! I definitely learned a thing
+or two through this exercise.
 
 ## Why?
 
